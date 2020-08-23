@@ -4,24 +4,29 @@ import datetime
 
 def get_value():
 
-    ser = serial.Serial('/dev/ttyACM0')
+    try:
 
-    data = ser.read(10).decode()
-    ser.close()
+        ser = serial.Serial('/dev/ttyACM0')
 
-    idx = data.index('.')
+        data = ser.read(10).decode()
+        ser.close()
 
-    if idx == 0 :
-        integer_part = "0"
-    else:
-        integer_part = data[idx - 1]
+        idx = data.index('.')
 
-    decimal_part = data[idx + 1: idx + 3]
+        if idx == 0 :
+            integer_part = "0"
+        else:
+            integer_part = data[idx - 1]
 
-    whole_data = integer_part + "." + decimal_part
+        decimal_part = data[idx + 1: idx + 3]
 
-    if whole_data[-1] == '.':
-        whole_data = whole_data[:-1]
+        whole_data = integer_part + "." + decimal_part
+
+        if whole_data[-1] == '.':
+            whole_data = whole_data[:-1]
+
+    except:
+        whole_data = "Cannot open serial port!"
 
     return whole_data
 
