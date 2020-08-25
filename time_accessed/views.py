@@ -8,4 +8,11 @@ class AccessView(generic.ListView):
 
     def get_queryset(self):
         """Return the last five published questions."""
-        return TimeAcessed.objects.all()
+
+        list_ = TimeAcessed.objects.all()
+
+        list_ = list_[::-1]
+
+        list_ = list_[:30]
+
+        return list_

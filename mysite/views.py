@@ -72,6 +72,11 @@ def readarduino(request):
         html = "<html><head><title>My Hello Django</title></head><h1>Hello from Jose Cazarin</h1><body>It is now " + str(now) + "<br>Value read from serial port = " + str(get_value()) + " V </body></html>"
         response = html
 
+        list_ = TimeAcessed.objects.all()
+
+        if(len(list_) >= 50):
+            list_.delete()
+
         time_acessed = TimeAcessed()
 
         time_acessed.formatted_date=str(now)
