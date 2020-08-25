@@ -1,0 +1,9 @@
+{% if time_list %}
+    <ul>
+    {% for time in time_list %}
+    <li>{{ forloop.counter }} -- {{ time }}</li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>No polls are available.</p>
+{% endif %}
