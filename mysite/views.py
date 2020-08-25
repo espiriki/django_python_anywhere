@@ -1,5 +1,6 @@
 from django.http import HttpResponse
 from django.utils.html import escape
+from time_accessed.models import TimeAcessed
 import serial
 import datetime
 
@@ -71,8 +72,14 @@ def readarduino(request):
         html = "<html><head><title>My Hello Django</title></head><h1>Hello from Jose Cazarin</h1><body>It is now " + str(now) + "<br>Value read from serial port = " + str(get_value()) + " V </body></html>"
         response = html
 
-    except:
-        response = "Server Error!"
+        time_acessed = TimeAcessed()
+
+        time_acessed.formatted_date=str(now)
+
+        time_acessed.save()
+
+    except Exception as exp:
+        response = type(exp).__name__
 
 
     return HttpResponse(response)
