@@ -1,46 +1,57 @@
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
+from django.shortcuts import get_object_or_404, render
+from django.views import View
+from django.urls import reverse
+from .models import Choice, Question
+
 import serial
 import datetime
 
-def get_value():
+class DetailView(View):
+
+    def get(self, request, question_id):
+
+        question = get_object_or_404(Question, pk=question_id)
+
+        return render(request, 'polls/detail.html', {'question': question})
+
+class ResultsView(View):
+
+    def get(self, request, question_id):
+
+        question = get_object_or_404(Question, pk=question_id)
+
+        return render(request, 'polls/results.html', {'question': question})
+
+class IndexView(View):
+
+    def get(self, request):
+
+        latest_question_list = Question.objects.order_by('-pub_date')[:5]
+
+        context = {'latest_question_list': latest_question_list}
+        return render(request, 'polls/index.html', context)
+
+def vote(request, question_id):
+
+    question = get_object_or_404(Question, pk=question_id)
 
     try:
+        selected_choice = question.choice_set.get(pk=request.POST['choice'])
+    except (KeyError, Choice.DoesNotExist):
+        # Redisplay the question voting form.
+        return render(request, 'polls/detail.html', {
+            'question': question,
+            'error_message': "You didn't select a choice.",
+        })
 
-        ser = serial.Serial('/dev/ttyACM0')
+    else:
+        selected_choice.votes += 1
+        selected_choice.save()
+        # Always return an HttpResponseRedirect after successfully dealing
+        # with POST data. This prevents data from being posted twice if a
+        # user hits the Back button.
+        return HttpResponseRedirect(reverse('polls:results', args=(question.id,)))
 
-        data = ser.read(10).decode()
-        ser.close()
-
-        idx = data.index('.')
-
-        if idx == 0 :
-            integer_part = "0"
-        else:
-            integer_part = data[idx - 1]
-
-        decimal_part = data[idx + 1: idx + 3]
-
-        whole_data = integer_part + "." + decimal_part
-
-        if whole_data[-1] == '.':
-            whole_data = whole_data[:-1]
-
-    except:
-        whole_data = "Cannot open serial port!"
-
-    return whole_data
-
-
-def index(request):
-
-    try:
-
-        now = datetime.datetime.now()
-        html = "<html><head><title>My Hello Django</title></head><h1>Hello from Jose Cazarin</h1><body>It is now " + str(now) + "<br>Value read from serial port = " + str(get_value()) + " V </body></html>"
-        response = html
-
-    except:
-        response = "Server Error!"
-
-
-    return HttpResponse(response)
+def owner(request):
+    return HttpResponse("Hello, world. 9a96a2c7 is the polls index.")
